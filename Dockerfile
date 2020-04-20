@@ -2,7 +2,7 @@ FROM registry.access.redhat.com/ubi8:latest
 
 RUN mkdir -p /app/src
 
-ADD requirements.txt bot.py /app/src
+ADD requirements.txt bot.py /app/src/
 
 WORKDIR /app/src
 
