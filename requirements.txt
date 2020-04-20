@@ -1,0 +1,3 @@
+google-cloud-pubsub
+google-auth
+google-api-python-client
