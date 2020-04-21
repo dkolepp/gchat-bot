@@ -25,6 +25,8 @@ import time
 from google.cloud import pubsub_v1
 from googleapiclient.discovery import build
 import google.auth
+import importlib
+import utils
 
 def receive_messages():
     """Receives messages from a pull subscription."""
@@ -75,6 +77,7 @@ def format_response(event):
     event_type = event['type']
 
     text = ""
+    mention_sender = '<{}>'.format(event['user']['name'])
     sender_name = event['user']['displayName']
 
     # Case 1: The bot was added to a room
@@ -86,7 +89,7 @@ def format_response(event):
         text = 'Thanks for adding me to a DM, {}!'.format(sender_name)
 
     elif event_type == 'MESSAGE':
-        text = 'Your message, {}: "{}"'.format(sender_name, event['message']['text'])
+        text = do_action(event)
 
     response = {'text': text}
 
@@ -97,6 +100,31 @@ def format_response(event):
         response['thread'] = thread_id
 
     return response
+
+def do_action(event):
+    msg_text = event['message']['text']
+    space_type = event['space']['type']
+
+    args = msg_text.strip().split()
+    if space_type == 'ROOM':
+        args = args[1:]
+    action, tokens = args[0], args[1:]
+    logging.info("Action: %s, %s", action, tokens)
+    if action == "help":
+        return utils.get_help()
+    modules = utils.MODULES
+
+    try:
+        mod = modules[action]
+    except KeyError:
+        return 'I do not understand your request.  Try `help` to see what I can do.'
+    ####
+    try:
+        return mod.process_event(tokens, event)
+    except ValueError:
+        return 'Ewhhh... I was not able to complete your request. Something went wrong!'
+    ####
+####
 
 if __name__ == '__main__':
     if 'SUBSCRIPTION_ID' not in os.environ:
