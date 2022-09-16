@@ -6,7 +6,7 @@ ADD requirements.txt bot2.py /app/src/
 
 WORKDIR /app/src
 
-RUN dnf install -y python38 python3-devel gcc gcc-c++
+RUN dnf install -y python38 python38-devel gcc gcc-c++
 
 RUN pip3.8 install -r requirements.txt
 
