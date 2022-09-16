@@ -22,18 +22,21 @@ import logging
 import os
 import sys
 import time
+import importlib
+
 from google.cloud import pubsub_v1
 from googleapiclient.discovery import build
 import google.auth
-import importlib
+
 import utils
 
 def receive_messages():
     """Receives messages from a pull subscription."""
 
+    # https://google-auth.readthedocs.io/en/master/reference/google.auth.html#google.auth.default
     scopes = ['https://www.googleapis.com/auth/chat.bot']
-    credentials, project_id = google.auth.default()
-    credentials = credentials.with_scopes(scopes=scopes)
+    credentials, project_id = google.auth.default(scopes=scopes)
+
     chat = build('chat', 'v1', credentials=credentials)
 
     subscription_id = os.environ.get('SUBSCRIPTION_ID')
@@ -53,12 +56,14 @@ def receive_messages():
             return
 
         response = format_response(event)
+        message.ack()
 
         # Send the asynchronous response back to Hangouts Chat
+        # https://developers.google.com/chat/api/guides/auth/service-accounts#step_4_build_a_service_endpoint_and_call_the_chat_api
         chat.spaces().messages().create(
             parent=space_name,
             body=response).execute()
-        message.ack()
+        #message.ack()
 
     subscriber.subscribe(subscription_path, callback=callback)
     logging.info('Listening for messages on %s', subscription_path)
