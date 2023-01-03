@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: chat-bot
+  labels:
+    app: chat-bot
+spec:
+  selector:
+    app: chat-bot
+  ports:
+    - port: 8080
+      name: http
+---

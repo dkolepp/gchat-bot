@@ -1,0 +1,23 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: "chat-bot-build"
+spec:
+  runPolicy: "Serial"
+  triggers:
+    - type: "GitHub"
+      github:
+        secret: "secret101"
+    - type: "Generic"
+      generic:
+        secret: "secret101"
+    - type: "ImageChange"
+  source:
+    git:
+      uri: "https://github.com/dkolepp/gchat-bot.git"
+  strategy:
+    dockerStrategy: {}
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "gls_chat_bot:latest"
